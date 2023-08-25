@@ -1,39 +1,118 @@
 import './App.css';
-
-import Navbar from './components/navbar';
-import Products from './components/Products';
+import todoList from './todoList'
+import TodoCard from './components/TodoCard';
 import { useState } from 'react';
 
 function App() {
-  const [cartItems, setCartItems] = useState([]);
+  const [todos, setTodos] = useState(todoList);
+  const [taskName, setTaskName] = useState('');
+  const [description, setDescription] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
 
-  const addToCart = (product) => {
-    setCartItems([...cartItems, product]);
-  };
+  // Adding a new Todo Card
+  const addTodo = () => {
+    if (taskName && description) {
+      const newTodo = {
+        id: todos.length + 1,
+        taskName,
+        description,
+        status: 'Not Completed',
+      }
 
-  const removeFromCart = (productToRemove) => {
-    const updatedCart = cartItems.filter(item => item.id !== productToRemove.id);
-    setCartItems(updatedCart);
-  };
+      setTodos([...todos, newTodo]);
+      setTaskName(''); // Clearing the Name input
+      setDescription(''); // Clearing the Description input
+    }
+  }
+
+  // Filtering the Todo Card basend on Completion Status
+  const filterTodos = (todo) => {
+    if (filterStatus === 'All') {
+      return true;
+    }
+    return todo.status === filterStatus;
+  }
+
+  // Updating the Status of the Todo Card
+  const updateStatus = (id, newStatus) => {
+    const updatedTodos = todos.map((todo) =>
+      todo.id === id ? { ...todo, status: newStatus } : todo
+    );
+    setTodos(updatedTodos);
+  }
+
+  // Deleting the Todo Card
+  const deleteTodo = (id) => {
+    const updatedTodos = todos.filter((todo) => todo.id !== id);
+    setTodos(updatedTodos);
+  }
 
   return (
-    <div className="App">
-      <Navbar cartItemCount={cartItems.length} />
-      <div>
-        <header className="bg-dark py-5">
-          <div className="container px-4 my-5">
-            <div className="text-center text-white">
-              <h1 className="display-4 fw-bolder">Shop in Style</h1>
-              <p className="lead fw-normal text-white-50 mb-0">With this shop hompeage template</p>
-            </div>
+    <div className="App m-4">
+      <div className="container p-5 m-auto">
+
+        <h1 className="text-center text-success mb-3">My Todo</h1>
+
+        <div className="row align-items-end">
+          <div className="col-md-5 col-12 mb-md-0 mb-3">
+            <input
+              type="text"
+              placeholder="Todo Name"
+              value={taskName}
+              onChange={(event) => setTaskName(event.target.value)}
+              className="form-control rounded"
+            />
           </div>
-        </header>
-        <Products addToCart={addToCart} removeFromCart={removeFromCart} cartItems={cartItems} />
-        <footer className="py-5 bg-dark">
-          <div className="container"><p className="m-0 text-center text-white">Copyright © Your Website 2023</p></div>
-        </footer>
-        
+          <div className="col-md-5 col-12 mb-md-0 mb-3">
+            <input
+              type="text"
+              placeholder="Description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              className="form-control rounded"
+            />
+          </div>
+          <div className="col-md-2 col-12">
+            <button
+              type="button"
+              className="btn btn-success rounded w-100 align-self-start align-md-middle"
+              onClick={addTodo}
+            >
+              Add Todo
+            </button>
+          </div>
+        </div>
+
       </div>
+
+      <div className="container">
+        <div className="d-flex justify-content-between flex-wrap">
+
+          <p><b>My Todos</b></p>
+
+          <label><b>Status:</b>
+            <select className="custom-select" value={filterStatus} onChange={(event) => setFilterStatus(event.target.value)}>
+              <option value="All">All</option>
+              <option value="Completed">Completed</option>
+              <option value="Not Completed">Not Completed</option>
+            </select>
+          </label>
+
+        </div>
+        <div className="row my-3">
+          {todos.filter(filterTodos).map((todo) => (
+            <div className="col-12 col-md-4" key={todo.id}>
+              <TodoCard
+                todo={todo}
+                updateStatus={updateStatus}
+                deleteTodo={deleteTodo}
+              />
+            </div>
+          ))}
+        </div>
+
+      </div>
+
     </div>
   );
 }
